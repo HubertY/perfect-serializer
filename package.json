@@ -1,0 +1,30 @@
+{
+    "name": "perfect-serializer",
+    "version": "0.0.1",
+    "description": "a javascript serializer that never* makes mistakes",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "/dist"
+    ],
+    "scripts": {
+        "test": "jest",
+        "build": "tsc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/HubertY/perfect-serializer.git"
+    },
+    "author": "Hubert Yuan <yuanhubert@gmail.com> (hubertyuan.com)",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/HubertY/perfect-serializer/issues"
+    },
+    "homepage": "https://github.com/HubertY/perfect-serializer#readme",
+    "devDependencies": {
+        "@types/jest": "^28.1.6",
+        "jest": "^28.1.3",
+        "ts-jest": "^28.0.7",
+        "typescript": "^4.7.4"
+    }
+}
