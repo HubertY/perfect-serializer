@@ -305,14 +305,15 @@ class Serializer {
      * @param custom custom serialization logic for things that have the object as a prototype.
      */
     register(s, obj, custom) {
-        if (!s || !s.length) {
+        if (!s.length) {
             throw new TypeError("Must provide a name!");
         }
-        if (s[0] === "_") {
-            throw new TypeError(`Provided name ${s} cannot start with an underscore!`);
-        }
         if (this.globalRegistry.getKey(obj)) {
-            throw new TypeError(`the object ${obj} is already registered under key ${this.globalRegistry.getKey(obj)}!`);
+            console.warn(`object ${obj} is already registered under key ${this.globalRegistry.getKey(obj)}`);
+            return;
+        }
+        if (s.indexOf(".") === -1) {
+            s = `.${s}`;
         }
         if (this.globalRegistry.get(s)) {
             throw new TypeError(`name ${s} is taken!`);
@@ -333,6 +334,16 @@ class Serializer {
         }
         else {
             throw new TypeError("provided argument is not a constructor");
+        }
+    }
+    /**
+     * Register a set of objects with the serializer under a shared namespace.
+     * @param namespace prefix for names registered with the module.
+     * @param module
+     */
+    registerModule(namespace, module) {
+        for (const key of Object.keys(module)) {
+            this.register(`${namespace}.${key}`, module[key].item, module[key].custom);
         }
     }
 }

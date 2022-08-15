@@ -8,7 +8,7 @@ declare class Registry<T = object> {
     getKey(obj: T): string | undefined;
     constructor();
 }
-declare type CustomSerializer<T, S> = {
+export declare type CustomSerializer<T, S> = {
     encode: (arg: T, serial: Function) => S;
     initialize: (proto: ValidPrototype) => T;
     decode: (item: T, arg: S, deref: (s: SerializeReturn) => any, decode?: DeferredLookup) => void;
@@ -20,6 +20,11 @@ declare type localRef = [number];
 declare type undef = [];
 declare type SerializeReturn = undef | null | globalRef | localRef | string | boolean | number;
 declare type ValidPrototype = object | Function | null;
+declare type RegisterArgs<T, D> = {
+    item: T;
+    custom?: CustomSerializer<T, D>;
+};
+export declare type SerializerModuleArgs = Record<string, RegisterArgs<any, any>>;
 declare class Serializer {
     MAX_DEPTH: number;
     globalRegistry: Registry<Function | Object>;
@@ -51,6 +56,12 @@ declare class Serializer {
      * @param custom custom serialization logic for instances of the class.
      */
     registerClass<T>(s: string, cons: new (...args: any) => T, custom?: CustomSerializer<T, any>): void;
+    /**
+     * Register a set of objects with the serializer under a shared namespace.
+     * @param namespace prefix for names registered with the module.
+     * @param module
+     */
+    registerModule(namespace: string, module: SerializerModuleArgs): void;
     /**
      *
      * @param maxDepth the maximum recursion depth for serialization and deserialization.

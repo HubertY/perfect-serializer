@@ -42,7 +42,7 @@ class NumericRegistry<T = object>{
 }
 
 
-type CustomSerializer<T, S> = { encode: (arg: T, serial: Function) => S, initialize: (proto: ValidPrototype) => T, decode: (item: T, arg: S, deref: (s: SerializeReturn) => any, decode?: DeferredLookup) => void };
+export type CustomSerializer<T, S> = { encode: (arg: T, serial: Function) => S, initialize: (proto: ValidPrototype) => T, decode: (item: T, arg: S, deref: (s: SerializeReturn) => any, decode?: DeferredLookup) => void };
 type AnyCustomSerializer = CustomSerializer<any, any>
 
 type DeferredLookup = (value: any, cb: (item: any) => void) => void;
@@ -276,6 +276,8 @@ function serialize(item: any, globalRegistry: Registry<Function | object>, worki
     }
 }
 
+type RegisterArgs<T, D> = { item: T, custom?: CustomSerializer<T, D> };
+export type SerializerModuleArgs = Record<string, RegisterArgs<any, any>>;
 class Serializer {
     MAX_DEPTH: number;
     globalRegistry: Registry<Function | Object>;
@@ -311,14 +313,15 @@ class Serializer {
      * @param custom custom serialization logic for things that have the object as a prototype.
      */
     register<T extends object | Function, D>(s: string, obj: T, custom?: CustomSerializer<T, D>) {
-        if (!s || !s.length) {
+        if (!s.length) {
             throw new TypeError("Must provide a name!");
         }
-        if (s[0] === "_") {
-            throw new TypeError(`Provided name ${s} cannot start with an underscore!`);
-        }
         if (this.globalRegistry.getKey(obj)) {
-            throw new TypeError(`the object ${obj} is already registered under key ${this.globalRegistry.getKey(obj)}!`);
+            console.warn(`object ${obj} is already registered under key ${this.globalRegistry.getKey(obj)}`);
+            return;
+        }
+        if (s.indexOf(".") === -1) {
+            s = `.${s}`;
         }
         if (this.globalRegistry.get(s)) {
             throw new TypeError(`name ${s} is taken!`);
@@ -339,6 +342,16 @@ class Serializer {
         }
         else {
             throw new TypeError("provided argument is not a constructor");
+        }
+    }
+    /**
+     * Register a set of objects with the serializer under a shared namespace.
+     * @param namespace prefix for names registered with the module.
+     * @param module 
+     */
+    registerModule(namespace: string, module: SerializerModuleArgs) {
+        for (const key of Object.keys(module)) {
+            this.register(`${namespace}.${key}`, module[key].item, module[key].custom);
         }
     }
     /**
